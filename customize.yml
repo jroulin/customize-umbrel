@@ -1,0 +1,36 @@
+---
+
+- name: ""
+  hosts: umbrel
+  gather_facts: no
+  tasks:
+
+    - name: Modify bitcoin.conf
+      ansible.builtin.lineinfile:
+          path: /home/umbrel/umbrel/bitcoin/bitcoin.conf
+          insertafter: 'rpcallowip=192.168.1.0/24'
+          line: 'rpcallowip=192.168.1.0/24'
+      notify: Restart bitcoind
+
+    - name: Modify docker-compose.yml
+      ansible.builtin.lineinfile:
+          path: /home/umbrel/umbrel/docker-compose.yml
+          insertbefore: '"$BITCOIN_P2P_PORT:$BITCOIN_P2P_PORT"'
+          line: '                    - "$BITCOIN_RPC_PORT:$BITCOIN_RPC_PORT"'
+      notify: Restart services
+
+  handlers:
+
+    - name: Restart services
+      become: yes
+      ansible.builtin.systemd:
+        name: umbrel-startup
+        state: restarted
+
+    - name: Restart bitcoind
+      ansible.builtin.command:
+        cmd: docker-compose restart bitcoin
+      args:
+        chdir: /home/umbrel/umbrel
+
+...
