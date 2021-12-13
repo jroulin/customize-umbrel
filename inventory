@@ -1,2 +1,2 @@
 [umbrel]
-umbrel.local ansible_user=umbrel
+umbrel.local ansible_user=umbrel local_network=192.168.18.0/24 serial_line=/dev/ttyACM0

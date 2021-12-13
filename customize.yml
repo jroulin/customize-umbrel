@@ -5,19 +5,45 @@
   gather_facts: no
   tasks:
 
-    - name: Modify bitcoin.conf
-      ansible.builtin.lineinfile:
-          path: /home/umbrel/umbrel/bitcoin/bitcoin.conf
-          insertafter: 'rpcallowip=192.168.1.0/24'
-          line: 'rpcallowip=192.168.1.0/24'
-      notify: Restart bitcoind
+    - block:
 
-    - name: Modify docker-compose.yml
-      ansible.builtin.lineinfile:
-          path: /home/umbrel/umbrel/docker-compose.yml
-          insertbefore: '"$BITCOIN_P2P_PORT:$BITCOIN_P2P_PORT"'
-          line: '                    - "$BITCOIN_RPC_PORT:$BITCOIN_RPC_PORT"'
-      notify: Restart services
+      - name: Modify bitcoin.conf
+        ansible.builtin.lineinfile:
+            path: /home/umbrel/umbrel/bitcoin/bitcoin.conf
+            insertafter: 'rpcallowip=127.0.0.1'
+            line: 'rpcallowip={{ local_network }}'
+            firstmatch: yes
+        notify: Restart services
+
+      - name: Modify docker-compose.yml
+        ansible.builtin.lineinfile:
+            path: /home/umbrel/umbrel/docker-compose.yml
+            insertbefore: '"\$BITCOIN_P2P_PORT:\$BITCOIN_P2P_PORT"'
+            line: '                    - "$BITCOIN_RPC_PORT:$BITCOIN_RPC_PORT"'
+            firstmatch: yes
+        notify: Restart services
+
+      when: local_network is defined
+
+    - block:
+
+      - name: Modify hass/docker-compose.yml
+        ansible.builtin.lineinfile:
+            path: /home/umbrel/umbrel/apps/home-assistant/docker-compose.yml
+            insertafter: 'ipv4_address: $APP_HOME_ASSISTANT_IP'
+            line: "    devices:"
+            firstmatch: yes
+        notify: Restart services
+  
+      - name: Modify hass/docker-compose.yml (2)
+        ansible.builtin.lineinfile:
+            path: /home/umbrel/umbrel/apps/home-assistant/docker-compose.yml
+            insertafter: 'devices:'
+            line: "      - {{ serial_line }}"
+            firstmatch: yes
+        notify: Restart services
+
+      when: serial_line is defined
 
   handlers:
 
@@ -26,11 +52,5 @@
       ansible.builtin.systemd:
         name: umbrel-startup
         state: restarted
-
-    - name: Restart bitcoind
-      ansible.builtin.command:
-        cmd: docker-compose restart bitcoin
-      args:
-        chdir: /home/umbrel/umbrel
 
 ...
