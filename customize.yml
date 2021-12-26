@@ -11,7 +11,7 @@
         ansible.builtin.lineinfile:
             path: /home/umbrel/umbrel/bitcoin/bitcoin.conf
             insertafter: 'rpcallowip=127.0.0.1'
-            line: 'rpcallowip={{ local_network }}'
+            line: 'rpcallowip={{ bitcoin_local_network }}'
             firstmatch: yes
         notify: Reload bitcoind
 
@@ -23,7 +23,7 @@
             firstmatch: yes
         notify: Reload bitcoind
 
-      when: local_network is defined
+      when: bitcoin_local_network is defined
 
     - block:
 
@@ -50,11 +50,11 @@
         ansible.builtin.lineinfile:
             path: /home/umbrel/umbrel/apps/home-assistant/docker-compose.yml
             insertafter: 'devices:'
-            line: "      - {{ serial_line }}"
+            line: "      - {{ hass_serial_line }}"
             firstmatch: yes
         notify: Reload HASS
 
-      when: serial_line is defined
+      when: hass_serial_line is defined
 
   handlers:
 
