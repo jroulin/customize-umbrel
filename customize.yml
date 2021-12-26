@@ -13,7 +13,7 @@
             insertafter: 'rpcallowip=127.0.0.1'
             line: 'rpcallowip={{ local_network }}'
             firstmatch: yes
-        notify: Restart services
+        notify: Reload bitcoind
 
       - name: Modify docker-compose.yml
         ansible.builtin.lineinfile:
@@ -21,9 +21,20 @@
             insertbefore: '"\$BITCOIN_P2P_PORT:\$BITCOIN_P2P_PORT"'
             line: '                    - "$BITCOIN_RPC_PORT:$BITCOIN_RPC_PORT"'
             firstmatch: yes
-        notify: Restart services
+        notify: Reload bitcoind
 
       when: local_network is defined
+
+    - block:
+
+      - name: Insert specified docker image for Home Assistant in docker-compose.yml
+        ansible.builtin.replace:
+            path: /home/umbrel/umbrel/apps/home-assistant/docker-compose.yml
+            regexp: '^(\s*image:\s*)(.*)$'
+            replace: '\1{{ hass_docker_image }}'
+        notify: Reload HASS
+  
+      when: hass_docker_image is defined
 
     - block:
 
@@ -33,7 +44,7 @@
             insertafter: 'ipv4_address: $APP_HOME_ASSISTANT_IP'
             line: "    devices:"
             firstmatch: yes
-        notify: Restart services
+        notify: Reload HASS
   
       - name: Modify hass/docker-compose.yml (2)
         ansible.builtin.lineinfile:
@@ -41,16 +52,26 @@
             insertafter: 'devices:'
             line: "      - {{ serial_line }}"
             firstmatch: yes
-        notify: Restart services
+        notify: Reload HASS
 
       when: serial_line is defined
 
   handlers:
 
-    - name: Restart services
-      become: yes
-      ansible.builtin.systemd:
-        name: umbrel-startup
-        state: restarted
+    - name: Reload HASS
+      ansible.builtin.shell: |
+        set -euo pipefail
+        ~/umbrel/scripts/app stop home-assistant
+        ~/umbrel/scripts/app install home-assistant
+      args:
+        executable: /bin/bash
+
+    - name: Reload bitcoind
+      ansible.builtin.shell: |
+        set -euo pipefail
+        cd ~/umbrel
+        docker-compose restart bitcoin
+      args:
+        executable: /bin/bash
 
 ...
