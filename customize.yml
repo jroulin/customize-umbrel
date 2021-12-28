@@ -56,6 +56,34 @@
 
       when: hass_serial_line is defined
 
+    - block:
+
+      - name: Modify torrc for ssh
+        ansible.builtin.lineinfile:
+            path: /home/umbrel/umbrel/tor/torrc-umbrel
+            insertafter: 'HiddenServicePort 10009 10.21.21.9:10009'
+            line: '# ssh Hidden Service'
+            firstmatch: yes
+        notify: Reload tor
+
+      - name: Modify torrc for ssh (part 2)
+        ansible.builtin.lineinfile:
+            path: /home/umbrel/umbrel/tor/torrc-umbrel
+            insertafter: '# ssh Hidden Service'
+            line: 'HiddenServiceDir /var/lib/tor/ssh'
+            firstmatch: yes
+        notify: Reload tor
+
+      - name: Modify torrc for ssh (part 3)
+        ansible.builtin.lineinfile:
+            path: /home/umbrel/umbrel/tor/torrc-umbrel
+            insertafter: 'HiddenServiceDir /var/lib/tor/ssh'
+            line: 'HiddenServicePort 22 10.21.21.1:22'
+            firstmatch: yes
+        notify: Reload tor
+
+      when: expose_ssh is defined
+
   handlers:
 
     - name: Reload HASS
@@ -71,6 +99,14 @@
         set -euo pipefail
         cd ~/umbrel
         docker-compose restart bitcoin
+      args:
+        executable: /bin/bash
+
+    - name: Reload tor
+      ansible.builtin.shell: |
+        set -euo pipefail
+        cd ~/umbrel
+        docker-compose restart tor
       args:
         executable: /bin/bash
 

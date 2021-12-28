@@ -10,11 +10,12 @@ Edit the `inventory` with the variables you need.
 
 Here are the available variables:
 
-| Variable | Description |
-|----------|-------------|
-| bitcoin\_local\_network | local network to expose bitcoind (i.e. 192.168.1.0/24) |
-| hass\_serial\_line | serial device to expose to home assistant container (i.e. /dev/ttyACM0) |
-| hass\_docker\_image | docker image to use for home assistant |
+| Variable                | Description                                                             |
+|-------------------------|-------------------------------------------------------------------------|
+| bitcoin\_local\_network | local network to expose bitcoind (i.e. 192.168.1.0/24)                  |
+| hass\_serial\_line      | serial device to expose to home assistant container (i.e. /dev/ttyACM0) |
+| hass\_docker\_image     | docker image to use for home assistant                                  |
+| expose\_ssh             | expose ssh in tor if set                                                |
 
 And then launch the customization like this:
 
