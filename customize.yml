@@ -91,6 +91,9 @@
         set -euo pipefail
         ~/umbrel/scripts/app stop home-assistant
         ~/umbrel/scripts/app install home-assistant
+        docker image prune --all --force
+        docker container prune --force
+        docker image prune -a --force
       args:
         executable: /bin/bash
 
