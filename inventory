@@ -1,2 +1,2 @@
 [umbrel]
-umbrel.local ansible_user=umbrel bitcoin_local_network=192.168.1.0/24 hass_serial_line=/dev/ttyUSB0 hass_docker_image=ghcr.io/home-assistant/home-assistant:2022.2.8@sha256:f02d58e1bc2f6ad3b6ceed33c23923c956731b6e2367a5bf2ebba0c6e0addb0f expose_ssh=true
+umbrel.local ansible_user=umbrel bitcoin_local_network=192.168.1.0/24 hass_serial_line=/dev/ttyUSB0 hass_docker_image=ghcr.io/home-assistant/home-assistant:2022.3.7@sha256:ba21b80e476575feb2195797e31e968bb36f4b9c4c77040b1f761e3e6f7a903a expose_ssh=true
